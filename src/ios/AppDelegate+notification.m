@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate+notification.h"
+#import "AppDelegate+MCE.h"
 #import "PushPlugin.h"
 #import <objc/runtime.h>
 
@@ -89,11 +90,14 @@ static char coldstartKey;
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
     PushPlugin *pushHandler = [self getCommandInstance:@"PushNotification"];
     [pushHandler didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
+    [self MCEdidRegisterForRemoteNotificationsWithDeviceToken: deviceToken];
 }
 
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
     PushPlugin *pushHandler = [self getCommandInstance:@"PushNotification"];
     [pushHandler didFailToRegisterForRemoteNotificationsWithError:error];
+    [self MCEdidFailToRegisterForRemoteNotificationsWithError: error];
+
 }
 
 - (void) application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
@@ -102,6 +106,7 @@ static char coldstartKey;
     pushHandler.notificationMessage = userInfo;
     pushHandler.isInline = NO;
     [pushHandler notificationReceived];
+    [self MCEdidReceiveRemoteNotification: userInfo];
 }
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
@@ -165,6 +170,8 @@ static char coldstartKey;
             completionHandler(UIBackgroundFetchResultNewData);
         }
     }
+    [self MCEdidReceiveRemoteNotification: userInfo fetchCompletionHandler: completionHandler];
+
 }
 
 - (BOOL)userHasRemoteNotificationsEnabled {
@@ -244,6 +251,7 @@ forRemoteNotification: (NSDictionary *) notification completionHandler: (void (^
         pushHandler.isInline = NO;
 
         [pushHandler performSelectorOnMainThread:@selector(notificationReceived) withObject:pushHandler waitUntilDone:NO];
+        [self MCEhandleActionWithIdentifier:identifier forRemoteNotification:notification completionHandler:completionHandler];
     }
 }
 

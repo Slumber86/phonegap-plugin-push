@@ -102,15 +102,23 @@ static char coldstartKey;
 
 - (void) application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
     NSLog(@"clicked on the shade");
+    if([userInfo objectForKey: @"mce"] != nil){
+        [self MCEdidReceiveRemoteNotification: userInfo];
+        return;
+    }
     PushPlugin *pushHandler = [self getCommandInstance:@"PushNotification"];
     pushHandler.notificationMessage = userInfo;
     pushHandler.isInline = NO;
     [pushHandler notificationReceived];
-    [self MCEdidReceiveRemoteNotification: userInfo];
 }
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
     NSLog(@"didReceiveNotification with fetchCompletionHandler");
+
+    if([userInfo objectForKey: @"mce"] != nil){
+        [self MCEdidReceiveRemoteNotification: userInfo fetchCompletionHandler: completionHandler];
+        return;
+    }
 
     // app is in the foreground so call notification callback
     if (application.applicationState == UIApplicationStateActive) {
@@ -170,8 +178,6 @@ static char coldstartKey;
             completionHandler(UIBackgroundFetchResultNewData);
         }
     }
-    [self MCEdidReceiveRemoteNotification: userInfo fetchCompletionHandler: completionHandler];
-
 }
 
 - (BOOL)userHasRemoteNotificationsEnabled {
